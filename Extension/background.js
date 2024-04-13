@@ -65,7 +65,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
                 setBadgeCheckmark("\u2717", sender.tab.id);
                 tabStatusMap.set(sender.tab.id, STATUS.ERROR);
             }
-
+            downloadResult('CMPError');
             return false;
         }
 
@@ -74,6 +74,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
                 setBadgeCheckmark("", sender.tab.id);
                 tabStatusMap.set(sender.tab.id, STATUS.NOTHING);
             }
+            downloadResult('NothingFound');
 
             return false;
         }
@@ -108,7 +109,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
 
                 GDPRConfig.setStatistics(entries);
             });
-
+            downloadResult(json);
             return false;
         }
 
@@ -223,4 +224,17 @@ async function fetchRulesList(ruleList) {
     }
 
     return null;
+}
+
+function downloadResult(data) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        const date = new Date().toLocaleString("en-US", {timeZone: "America/New_York"}).split(',')[0].replaceAll('/', '-')
+
+        tabUrl = tabs[0].url.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        blobData = {tabUrl: data}
+        let blob = new Blob([JSON.stringify(blobData)]);
+        let url = URL.createObjectURL(blob);
+        chrome.downloads.download({ url, filename: `scraped-source-files/${date}/${tabUrl}/consent-o-matic-results` });
+    });
+    
 }
