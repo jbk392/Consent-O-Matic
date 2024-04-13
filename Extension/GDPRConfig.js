@@ -293,12 +293,12 @@ class GDPRConfig {
 }
 
 GDPRConfig.defaultValues = {
-    "A": false,
-    "B": false,
-    "D": false,
-    "E": false,
-    "F": false,
-    "X": false
+    "A": true,
+    "B": true,
+    "D": true,
+    "E": true,
+    "F": true,
+    "X": true
 };
 
 GDPRConfig.defaultSettings = {
