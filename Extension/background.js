@@ -228,13 +228,25 @@ async function fetchRulesList(ruleList) {
 
 function downloadResult(data) {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        const date = new Date().toLocaleString("en-US", {timeZone: "America/New_York"}).split(',')[0].replaceAll('/', '-')
-
+        const date = new Date().toLocaleString("en-US", {timeZone: "America/New_York"}).split(',')[0].replaceAll('/', '-');
         tabUrl = tabs[0].url.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        blobData = {tabUrl: data}
-        let blob = new Blob([JSON.stringify(blobData)]);
-        let url = URL.createObjectURL(blob);
-        chrome.downloads.download({ url, filename: `scraped-source-files/${date}/${tabUrl}/consent-o-matic-results` });
+        fetch("http://localhost:3000/upload", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                content: JSON.stringify({tabUrl: data}),
+                filename: 'metadata2',
+                filetype: `scraped-source-files/${date}/${tabUrl}/consent-o-matic-results`
+            })
+        })
+        .then(response => {
+            // Handle response
+        })
+        .catch(error => {
+            console.error('Error trying to post! ', error);
+        });
     });
     
 }
