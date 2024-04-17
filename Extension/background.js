@@ -226,27 +226,10 @@ async function fetchRulesList(ruleList) {
     return null;
 }
 
-function downloadResult(data) {
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        const date = new Date().toLocaleString("en-US", {timeZone: "America/New_York"}).split(',')[0].replaceAll('/', '-');
-        tabUrl = tabs[0].url.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        fetch("http://localhost:3000/upload", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                content: JSON.stringify({tabUrl: data}),
-                filename: 'metadata2',
-                filetype: `scraped-source-files/${date}/${tabUrl}/consent-o-matic-results`
-            })
-        })
-        .then(response => {
-            // Handle response
-        })
-        .catch(error => {
-            console.error('Error trying to post! ', error);
-        });
-    });
-    
-}
+// Listen for messages from the content script
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.message === "consent-status") {
+        // send status to form inject and download extension
+        chrome.runtime.sendMessage('ccmlpdhhhifgdkfklmpangheablmloih', {message: 'consent-status', status: request.status});
+    }
+});
