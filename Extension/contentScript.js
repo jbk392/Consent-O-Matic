@@ -46,9 +46,7 @@ async function contentScriptRunner() {
                                         "handled": evt.handled
                                     };
 
-                                    let dataToStore = {
-                                        'consent-o-matic': null
-                                    }
+                                    let consentStatus = "";
 
                                     if(evt.handled) {
                                         result.cmp = evt.cmpName;
@@ -56,22 +54,20 @@ async function contentScriptRunner() {
                                         result.url = url;
     
                                         chrome.runtime.sendMessage("HandledCMP|"+JSON.stringify(result));
-                                        dataToStore['consent-o-matic'] = JSON.stringify(result);
+                                        consentStatus = JSON.stringify(result);
                                     } else if(evt.error) {
                                         chrome.runtime.sendMessage("CMPError");
-                                        dataToStore['consent-o-matic'] = 'CMPError';
+                                        consentStatus = "CMPError";
                                     } else {
                                         chrome.runtime.sendMessage("NothingFound");
-                                        dataToStore['consent-o-matic'] = 'NothingFound';
+                                        consentStatus = "NothingFound";
                                     }
 
-                                    chrome.storage.local.set(dataToStore, function () {
-                                        if (chrome.runtime.lastError) {
-                                            console.error('Error setting data:', chrome.runtime.lastError.message);
-                                        } else {
-                                            console.log('Data stored successfully');
-                                        }
+                                    // notify background script of status
+                                    chrome.runtime.sendMessage({message: 'consent-status', status: consentStatus}, function(response) {
+                                        console.log('sent message: ', consentStatus)
                                     });
+
                                 });
         
                                 ConsentEngine.singleton = engine;
